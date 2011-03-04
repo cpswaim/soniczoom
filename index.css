@@ -1,0 +1,42 @@
+#content {
+  margin-left: auto ;
+  margin-right: auto ;
+  text-align:center;
+  color:#fff;
+}
+
+body, html{
+    background:#000;
+    color:#FFFFFF;
+	margin-left: 0px; 
+	margin-top: 0px; 
+	margin-right: 0px; 
+	margin-bottom: 0px; 
+	overflow: hidden; 
+} 
+
+#worldCanvas
+{
+  background-color:#000;
+}
+#canvasWrapper {
+
+    width: 640px;
+    height: 480px;
+    margin-left:auto;
+    margin-right:auto;
+    border:3px solid #FFFFFF;
+    
+}
+#header{
+    text-align:center;
+    width: 640px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#footer{
+    width: 640px;
+    margin-left:auto;
+    margin-right:auto;
+}
