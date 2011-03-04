@@ -390,7 +390,6 @@ dojo.declare("SonicZoom", null,{
 			switch(e.keyCode) {
 				case KEYCODE_SPACE:	
 					//Selection Made
-					dojo.disconnect(this.keyDownEvent);
 					this.selectMenuOption();
 					break;
 				case KEYCODE_W:
@@ -422,8 +421,6 @@ dojo.declare("SonicZoom", null,{
 			switch(e.keyCode) {
 				case KEYCODE_SPACE:	
 					//Selection Made
-					dojo.disconnect(this.keyDownEvent);
-					dojo.disconnect(this.keyUpEvent);
 					break;
 				case KEYCODE_W:
 				case KEYCODE_UP:
