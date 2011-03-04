@@ -383,7 +383,9 @@ dojo.declare("SonicZoom", null,{
 		menuNavigation : function(e){
 						
 						
-			console.log(e.keyCode)			
+			//console.log(e.keyCode);
+			
+					
 			if(!e){ var e = window.event; }
 			switch(e.keyCode) {
 				case KEYCODE_SPACE:	
@@ -393,7 +395,6 @@ dojo.declare("SonicZoom", null,{
 					break;
 				case KEYCODE_W:
 				case KEYCODE_UP:
-					console.log(this.menuPos);
 					if (!this.fwdHeld && this.menuPos > 0) {
 						this.fwdHeld = true;
 						this.menuStar.y = this.menuStar.y - 50;
@@ -499,6 +500,11 @@ dojo.declare("SonicZoom", null,{
 		
 		selectMenuOption : function() {
 			
+			this.audio.stop({channel:'menuinstruction'});
+			this.audio.stop({channel:'menuBackground'});
+			
+			console.log(this.audio);
+			
 			if(this.menuPos == 0){
 				//Training!
 				//connect button
@@ -512,7 +518,7 @@ dojo.declare("SonicZoom", null,{
 				});
 				
 				//re-attach listener
-				this.trainingOver = this.audio.addObserver(this.returnToMenu, 'menuBackground', ['finished-play']);
+				this.trainingOver = this.audio.addObserver(this.returnToMenu, 'menuinstruction', ['finished-play']);
 				
 			}
 			else if(this.menuPos == 1){
@@ -523,6 +529,8 @@ dojo.declare("SonicZoom", null,{
 		
 		playMenuChoice : function() {
 			
+			this.audio.stop({channel:'menuinstruction'});
+			
 			if (this.menuPos == 0) {
 				this.audio.play({
 					url: this.soundDir + 'training',
@@ -530,6 +538,24 @@ dojo.declare("SonicZoom", null,{
 					channel: 'menuinstruction'
 				});
 			}
+			else if (this.menuPos == 1) {
+				this.audio.play({
+					url: this.soundDir + 'startgame',
+					cache: true,
+					channel: 'menuinstruction'
+				});
+			}
+			
+		},
+		
+		returnToMenu : function(){
+			
+			this.audio.stop();
+			dojo.disconnect(this.keyDownEvent);
+			dojo.disconnect(this.keyUpEvent);
+			this.stage.clear();
+			
+			this.menuInit();
 			
 		},
 		
