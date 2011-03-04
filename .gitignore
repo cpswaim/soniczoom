@@ -1,0 +1,4 @@
+.tmp*
+/ex/.tmp*
+.dropbox
+.project
