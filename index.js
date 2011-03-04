@@ -1,7 +1,7 @@
 dojo.require("SonicZoom");
-audio = undefined;
+
+var audio = undefined;
 uow.getAudio().then(function(a) {
-				  a.say({text : "Welcome to the UNC Open Web Server!"});
 				  audio = a;
 				});
 
