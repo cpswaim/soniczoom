@@ -123,12 +123,12 @@ dojo.declare("SonicZoom", null,{
 				 this.objectCounter.text ="objects: "+this.stage.children.length;
 			}
 			
-//			for(var i = 0; i < this.canvas.width; i++){
-//				this.drawStar(i,0);
-//			}
+			for(var i = 0; i < this.canvas.width; i++){
+				this.drawStar(i,0);
+			}
 			
 			//garbage collection
-			//this.GC();
+			this.GC();
 			
             this.stage.tick();
         },
@@ -190,7 +190,7 @@ dojo.declare("SonicZoom", null,{
 			
 			this.drawUI();
 			this.drawShip();
-			//this.drawStars();
+			this.drawStars();
 			//this.drawCoin(this.canvas.width/2,this.canvas.height/2);
 			
 
@@ -326,6 +326,9 @@ dojo.declare("SonicZoom", null,{
 					} 
 					break;
 			}
+			
+						
+			this.playLaneSound();
 		},
 		
 		 handleKeyUp:function(e) {
@@ -333,14 +336,50 @@ dojo.declare("SonicZoom", null,{
 
 			if(!e){ var e = window.event; }
 			switch(e.keyCode) {
-				case KEYCODE_SPACE:	this.shootHeld = false; break;
-				case KEYCODE_A:;
-				case KEYCODE_LEFT:	this.lfHeld = false; break;
-				case KEYCODE_D:;
-				case KEYCODE_RIGHT: this.rtHeld = false; break;
-				case KEYCODE_W:;
-				case KEYCODE_UP:	this.fwdHeld = false; break;
+//				case KEYCODE_SPACE:	
+//					this.shootHeld = false; 
+//					break;
+				case KEYCODE_A:
+				case KEYCODE_LEFT:
+					this.lfHeld = false;
+					break;
+				case KEYCODE_D:
+				case KEYCODE_RIGHT: 
+					this.rtHeld = false; 
+					break;
+				case KEYCODE_W:
+				case KEYCODE_UP:	
+					this.fwdHeld = false; 
+					break;
 			}
+
+			
+		},
+		
+		playLaneSound:function(){
+			console.log(this.audio);
+			if (this.ship.currentLane == 0) {
+				this.audio.play({
+					url: '/db/Git/soniczoom/snd/leftlane-L',
+					cache: true,
+					channel: 'leftlane'
+				});
+			}
+			else if (this.ship.currentLane == 1) {
+				this.audio.play({
+					url: '/db/Git/soniczoom/snd/centerlane',
+					cache: true,
+					channel: 'centerlane'
+				});
+			}
+			else if (this.ship.currentLane == 2) {
+				this.audio.play({
+					url: '/db/Git/soniczoom/snd/rightlane-R',
+					cache: true,
+					channel: 'rightlane'
+				});
+			}
+			
 		},
 		
 		GC:function(){
