@@ -506,7 +506,7 @@ dojo.declare("SonicZoom", null,{
 		
 		selectMenuOption : function() {
 			
-			this.audio.stop();
+			this.audio.stop({channel:'menuinstruction'});
 			
 			this.menuTimer.stop();
 			
