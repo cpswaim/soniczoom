@@ -7,12 +7,17 @@ var KEYCODE_W = 87;			//usefull keycode
 var KEYCODE_A = 65;			//usefull keycode
 var KEYCODE_D = 68;			//usefull keycode
 var KEYCODE_S = 83;			//usefull keycode
+var KEYCODE_ENTER = 13;
+var KEYCODE_ESC = 27;
 
 dojo.provide("SonicZoom");
+
+dojo.require("dojox.timing._base");
 
 dojo.require("Ship");
 dojo.require("Star");
 dojo.require("Coin");
+
 
 dojo.declare("SonicZoom", null,{
     
@@ -41,6 +46,8 @@ dojo.declare("SonicZoom", null,{
 		menuStar:undefined,
 		menuPos: 0,
 		menuItems: 2,
+		menuTimer: undefined,
+		repeatInterval:10000,
 		
 		//Game Objects
 		ship: undefined,
@@ -53,7 +60,7 @@ dojo.declare("SonicZoom", null,{
 		coinPath:"img/coin.png",
 		
 		//sound
-		soundDir:'http://cameronswaim.com/soniczoom/snd/',
+		soundDir:'snd/',
 		audio:undefined,
 		menuBg:undefined,
 		trainingOver: undefined,
@@ -90,8 +97,9 @@ dojo.declare("SonicZoom", null,{
                 
                 this.canvas.height = this.height;
                 this.canvas.width = this.width;
-                
-                console.log("Boom");
+				
+				this.menuTimer = new dojox.timing.Timer();
+	        	this.menuTimer.setInterval(this.repeatInterval);
                 
                 //EaselJS Stage instance that wraps the Canvas element
                 this.stage;
@@ -125,6 +133,11 @@ dojo.declare("SonicZoom", null,{
 		
 		menuInit : function(){
 			
+			
+			this.menuPos = 0;			
+			
+			this.audio.stop();
+			
 			dojo.disconnect(this.clicker);
 			dojo.disconnect(this.keyDownEvent);
 			
@@ -134,10 +147,17 @@ dojo.declare("SonicZoom", null,{
 			this.startMenuMusic(undefined);
 			
 			this.menuBg = this.audio.addObserver(this.startMenuMusic, 'menuBackground', ['finished-play']);
-			
+						
 			this.audio.play({url:this.soundDir+'soniczoom', cache:true, channel:'menuinstruction'});
 			this.audio.play({url:this.soundDir+'menuinstructions', cache:true, channel:'menuinstruction'});
-			this.audio.play({url:this.soundDir+'training', cache:true, channel:'menuinstruction'});
+			
+			this.audio.play({url:this.soundDir+'training', cache:true, channel:'menuinstruction'}).callAfter(dojo.hitch(this, function(){
+				
+		        this.setMenuRepeat(0);
+					
+		        this.menuTimer.start();
+			
+			}));
 			
 			this.titleText = new Text("SONIC ZOOM!", "bold 60px Verdana", "#FFFFFF");
 			this.titleText.textAlign = "center";
@@ -167,8 +187,11 @@ dojo.declare("SonicZoom", null,{
 			});
 			
 			
-			this.stage.removeChild(this.messageField);
-			this.stage.removeChild(this.loadingText);
+			
+			
+			this.stage.removeAllChildren();
+			
+			this.drawStars(0);
 			
 			this.stage.addChild(this.titleText);
 			this.stage.addChild(this.trainingText);
@@ -176,6 +199,8 @@ dojo.declare("SonicZoom", null,{
 			this.stage.addChild(this.menuStar);
 			
 			this.stage.tick()
+			
+			this.tick = this.menuTick;
 			
 			
 			
@@ -264,40 +289,20 @@ dojo.declare("SonicZoom", null,{
 			
 			this.keyDownEvent = dojo.connect(null,'onkeydown', this, this.handleKeyDown);
 			this.keyUpEvent = dojo.connect(null,'onkeyup', this, this.handleKeyUp);
-			
-			
-			this.stage.removeChild(this.messageField);
-			
+						
 			this.stage.removeAllChildren();
 			
 			this.drawUI();
 			this.drawShip();
 			this.drawStars(1);
 			
-			//this.drawCoin(this.canvas.width/2,this.canvas.height/2);
-			
-
-//			var random = Math.random()
-//			var star = new Star({
-//				"x": this.canvas.width/2,
-//				"y": this.canvas.height/2,
-//				scalar: 8,
-//				maxAlpha: (0.3 + Math.floor(random * 66)/10),
-//				minAlpha: 0.3,
-//				frequency: (20 + Math.floor(random*56)),
-//				rotationSpeed: (80 + random * 181),
-//				speedIncrement: 0
-//			});
-//			this.stage.addChild(star);
-			
+			//this.drawCoin(this.canvas.width/2,this.canvas.height/2);			
 			
 			this.stage.tick();
 			
 			Ticker.setInterval(1000/this.fps);
 			
 			this.tick = this.gameTick;
-			
-//			Ticker.addListener(this);
 		},
 		
 		drawUI:function(){
@@ -388,6 +393,7 @@ dojo.declare("SonicZoom", null,{
 					
 			if(!e){ var e = window.event; }
 			switch(e.keyCode) {
+				case KEYCODE_ENTER:
 				case KEYCODE_SPACE:	
 					//Selection Made
 					this.selectMenuOption();
@@ -399,6 +405,8 @@ dojo.declare("SonicZoom", null,{
 						this.menuStar.y = this.menuStar.y - 50;
 						this.menuPos = this.menuPos-1;
 					} 
+					this.playMenuChoice();
+					this.setMenuRepeat(this.menuPos);
 					break;
 					
 				case KEYCODE_S:
@@ -408,10 +416,12 @@ dojo.declare("SonicZoom", null,{
 						this.menuStar.y = this.menuStar.y + 50;
 						this.menuPos = this.menuPos+1;
 					} 
+					this.playMenuChoice();
+					this.setMenuRepeat(this.menuPos);
 					break;
 			}
 			
-			this.playMenuChoice();
+			
 			
 		},
 		
@@ -440,9 +450,6 @@ dojo.declare("SonicZoom", null,{
 			
 			if(!e){ var e = window.event; }
 			switch(e.keyCode) {
-				case KEYCODE_SPACE:	
-					this.shootHeld = true; 
-					break;
 				case KEYCODE_A:
 				case KEYCODE_LEFT:
 					if (!this.lfHeld) {
@@ -471,7 +478,7 @@ dojo.declare("SonicZoom", null,{
 		},
 		
 		 handleKeyUp:function(e) {
-			//console.log("u:",e.keyCode);
+			console.log("u:",e.keyCode);
 
 			if(!e){ var e = window.event; }
 			switch(e.keyCode) {
@@ -490,6 +497,8 @@ dojo.declare("SonicZoom", null,{
 				case KEYCODE_UP:	
 					this.fwdHeld = false; 
 					break;
+				case KEYCODE_ESC:
+					this.menuInit();
 			}
 
 			
@@ -497,15 +506,18 @@ dojo.declare("SonicZoom", null,{
 		
 		selectMenuOption : function() {
 			
-			this.audio.stop({channel:'menuinstruction'});
-			this.audio.stop({channel:'menuBackground'});
+			this.audio.stop();
+			
+			this.menuTimer.stop();
 			
 			console.log(this.audio);
 			
 			if(this.menuPos == 0){
 				//Training!
 				//connect button
-				this.keyDownEvent = dojo.connect(null, 'onkeydown', this, this.returnToMenu);;
+				dojo.disconnect(this.keyDownEvent);
+				dojo.disconnect(this.keyUpEvent);
+				this.keyDownEvent = dojo.connect(null, 'onkeydown', this, this.returnToMenu);
 				
 				//play training
 				this.audio.play({
@@ -520,6 +532,8 @@ dojo.declare("SonicZoom", null,{
 			}
 			else if(this.menuPos == 1){
 				//Game On!
+				this.beginGame();
+				
 			}
 			
 		},
@@ -529,6 +543,7 @@ dojo.declare("SonicZoom", null,{
 			this.audio.stop({channel:'menuinstruction'});
 			
 			if (this.menuPos == 0) {
+				this.menuTimer.stop();
 				this.audio.play({
 					url: this.soundDir + 'training',
 					cache: true,
@@ -536,6 +551,7 @@ dojo.declare("SonicZoom", null,{
 				});
 			}
 			else if (this.menuPos == 1) {
+				this.menuTimer.stop();
 				this.audio.play({
 					url: this.soundDir + 'startgame',
 					cache: true,
@@ -545,38 +561,42 @@ dojo.declare("SonicZoom", null,{
 			
 		},
 		
-		returnToMenu : function(){
-			
-			this.audio.stop();
-			dojo.disconnect(this.keyDownEvent);
-			dojo.disconnect(this.keyUpEvent);
-			this.stage.clear();
-			
-			this.menuInit();
+		returnToMenu : function(e){
+			if(e.keyCode == KEYCODE_ESC){
+				this.audio.stop({channel: 'menuinstruction'});
+				dojo.disconnect(this.keyDownEvent);
+				dojo.disconnect(this.keyUpEvent);
+				
+				this.stage.removeAllChildren();
+				
+				this.menuInit();
+			}
 			
 		},
 		
 		playLaneSound:function(){
 			
+			this.audio.stop({channel:'lane'});
+			
 			if (this.ship.currentLane == 0) {
 				this.audio.play({
 					url: this.soundDir+'leftlane-L',
-					cache: true,
-					channel: 'leftlane'
+					cache: false,
+					channel: 'lane'
 				});
 			}
 			else if (this.ship.currentLane == 1) {
 				this.audio.play({
 					url: this.soundDir+'centerlane',
-					cache: true,
-					channel: 'centerlane'
+					cache: false,
+					channel: 'lane'
 				});
 			}
 			else if (this.ship.currentLane == 2) {
 				this.audio.play({
 					url: this.soundDir+'rightlane-R',
-					cache: true,
-					channel: 'rightlane'
+					cache: false,
+					channel: 'lane'
 				});
 			}
 			
@@ -585,6 +605,26 @@ dojo.declare("SonicZoom", null,{
 		startMenuMusic: function(event){
 			
 			this.audio.play({url: this.soundDir+'music', cache: true, channel:'menuBackground'});
+			this.audio.setProperty({name:'loop', value:true, immediate:true, channel:'menuBackground'});
+			this.audio.setProperty({name:'volume', value:0.5, immediate:true, channel:'menuBackground'});
+			
+		},
+		
+		setMenuRepeat: function (menuPosition){
+			
+			var soundByte = "";
+			
+			this.menuTimer.stop();
+			
+			if(menuPosition == 0) soundByte = "training";
+			else if(menuPosition == 1) soundByte = "startgame";
+			
+			
+			this.menuTimer.onTick = dojo.hitch(this, function(){
+				this.audio.play({url:this.soundDir+soundByte, cache:true, channel:'menuinstruction'})
+				});
+				
+			this.menuTimer.start();
 			
 		},
 		
