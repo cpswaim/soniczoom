@@ -136,7 +136,9 @@ dojo.declare("SonicZoom", null,{
 			
 			this.menuPos = 0;			
 			
-			this.audio.stop();
+			this.audio.stop({channel:'menuinstruction'});
+			this.audio.stop({channel:'menuBackground'});
+			this.audio.stop({channel:'lane'});
 			
 			dojo.disconnect(this.clicker);
 			dojo.disconnect(this.keyDownEvent);
@@ -471,6 +473,8 @@ dojo.declare("SonicZoom", null,{
 						this.fwdHeld = true;
 					} 
 					break;
+				case KEYCODE_ESC:
+					this.menuInit();
 			}
 			
 						
@@ -497,8 +501,7 @@ dojo.declare("SonicZoom", null,{
 				case KEYCODE_UP:	
 					this.fwdHeld = false; 
 					break;
-				case KEYCODE_ESC:
-					this.menuInit();
+
 			}
 
 			
@@ -532,6 +535,8 @@ dojo.declare("SonicZoom", null,{
 			}
 			else if(this.menuPos == 1){
 				//Game On!
+				this.audio.stop({channel:'menuinstruction'});
+				this.audio.stop({channel:'lane'});
 				this.beginGame();
 				
 			}
