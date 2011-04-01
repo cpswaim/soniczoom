@@ -14,6 +14,7 @@ dojo.provide("SonicZoom");
 
 dojo.require("dojox.timing._base");
 
+//dojo.require("BoundedObject");
 dojo.require("Ship");
 dojo.require("Star");
 dojo.require("Coin");
@@ -38,6 +39,7 @@ dojo.declare("SonicZoom", null,{
 		loadingText:undefined,
 		fpsCounter:undefined,
 		objectCounter:undefined,
+		timeCounter:undefined,
 		
 		//Menu
 		titleText:undefined,
@@ -48,12 +50,15 @@ dojo.declare("SonicZoom", null,{
 		menuItems: 2,
 		menuTimer: undefined,
 		repeatInterval:10000,
+		levelStartTime:0,
 		
 		//Game Objects
 		ship: undefined,
 		rock: undefined,
 		coin: undefined,
 		score:0,
+		level:1,
+		objectList:[],
 		
 		//Image stuff
 		images:{},
@@ -77,8 +82,6 @@ dojo.declare("SonicZoom", null,{
 		keyDownEvent: undefined,
 		keyUpEvent: undefined,
 		
-		TURN_FACTOR:7,
-
         constructor:function(args){
         
             //Take arguments and mix them in.
@@ -114,12 +117,9 @@ dojo.declare("SonicZoom", null,{
 				this.displayWelcome();
 				this.drawStars(0);
 				
-				this.stage.tick();
+				this.stage.update();
 				
-				this.loadImages();
-				
-				
-				                    
+				this.loadImages();				                    
                 
             }
             else{
@@ -150,14 +150,12 @@ dojo.declare("SonicZoom", null,{
 			
 			this.menuBg = this.audio.addObserver(this.startMenuMusic, 'menuBackground', ['finished-play']);
 						
-			this.audio.play({url:this.soundDir+'soniczoom', cache:true, channel:'menuinstruction'});
-			this.audio.play({url:this.soundDir+'menuinstructions', cache:true, channel:'menuinstruction'});
+			this.audio.play({url:this.soundDir+'soniczoom', channel:'menuinstruction'});
+			this.audio.play({url:this.soundDir+'menuinstructions',  channel:'menuinstruction'});
 			
-			this.audio.play({url:this.soundDir+'training', cache:true, channel:'menuinstruction'}).callAfter(dojo.hitch(this, function(){
+			this.audio.play({url:this.soundDir+'training',  channel:'menuinstruction'}).callAfter(dojo.hitch(this, function(){
 				
 		        this.setMenuRepeat(0);
-					
-		        this.menuTimer.start();
 			
 			}));
 			
@@ -200,7 +198,7 @@ dojo.declare("SonicZoom", null,{
 			this.stage.addChild(this.startGameText);
 			this.stage.addChild(this.menuStar);
 			
-			this.stage.tick()
+			this.stage.update()
 			
 			this.tick = this.menuTick;
 			
@@ -210,7 +208,7 @@ dojo.declare("SonicZoom", null,{
 		
 		menuTick : function() {
 			
-			this.stage.tick();
+			this.stage.update();
 			
 		},
         
@@ -218,17 +216,31 @@ dojo.declare("SonicZoom", null,{
 		
 			var ticks = Ticker.getTicks(false);
 			
+			
 			var secondsElapsed = ticks/this.fps;
+			
 			if (Math.floor(secondsElapsed) == secondsElapsed) {
+				this.gameTime = (secondsElapsed-this.levelStartTime-4)
+				
 				this.score = this.score + 5;
 				this.scoreField.text = "score: " + (this.score);
+				this.timeCounter.text = "time: "+(this.gameTime);
 			}
 			
+			
+			//Debug display
             if(this.debug){
 				 this.fpsCounter.text = "fps: " + (Math.floor(Ticker.getMeasuredFPS())).toString();
 				 this.objectCounter.text ="objects: "+this.stage.children.length;
 			}
 			
+			for (var i = 0; i < this.objectList.length; i++){
+				this.objectList[i].y += 3;
+			}
+			
+			this.checkCollisions();
+			
+			//Draw stars on the edge of the screen
 			for(var i = 0; i < this.canvas.width; i++){
 				this.drawStar(i,0,1);
 			}
@@ -236,8 +248,26 @@ dojo.declare("SonicZoom", null,{
 			//garbage collection
 			this.GC();
 			
-            this.stage.tick();
+            this.stage.update();
         },
+		
+		checkCollisions: function(){
+			
+			for (var i in this.objectList){
+				if((this.ship.currentLane == this.objectList[i].lane) && (this.objectList[i].y > this.canvas.height-(2*this.ship.bounds))){
+					this.stage.removeChild(this.objectList[i]);
+					this.score += 100;
+					this.objectList = [];
+					
+					this.stopCoinSound();
+					var newLane = Math.floor(Math.random()*3);
+					this.drawCoin(5,newLane);
+					this.audio.play({url:this.soundDir+'hitcoin', channel:'action'});
+					this.changeCoinSound();
+				}
+			}
+			
+		},
 		
 		loadImages:function(){
 			
@@ -262,7 +292,9 @@ dojo.declare("SonicZoom", null,{
 			this.keyDownEvent = dojo.connect(null, 'onkeydown', this, this.menuInit); 
 			this.loadingText.text = "Press Any Key to Play!";
 			
-			this.stage.tick();
+			this.audio.say({text:"Press any key to play"});
+			
+			this.stage.update();
 				 
 		},
 		
@@ -298,13 +330,24 @@ dojo.declare("SonicZoom", null,{
 			this.drawShip();
 			this.drawStars(1);
 			
-			//this.drawCoin(this.canvas.width/2,this.canvas.height/2);			
+			this.drawCoin(1, 1);	
 			
-			this.stage.tick();
+			this.stage.update();
 			
 			Ticker.setInterval(1000/this.fps);
+									
+			var ticks = Ticker.getTicks(false);
+			var secondsElapsed = ticks/this.fps;
+			
+			this.levelStartTime = Math.floor(ticks/this.fps);
+			
+			this.audio.play({url:this.soundDir+'readysetgo', channel:'menuinstruction'});
+			
+			console.log("levelstart",this.levelStartTime);
 			
 			this.tick = this.gameTick;
+			
+			this.playCoinSound();
 		},
 		
 		drawUI:function(){
@@ -313,6 +356,7 @@ dojo.declare("SonicZoom", null,{
 				this.drawObjectCounter();
 			}
 			
+			this.drawTimeCounter();
 			this.drawScoreField();
 		},
 		
@@ -357,10 +401,13 @@ dojo.declare("SonicZoom", null,{
 			}
 		},
 		
-		drawCoin:function(x,y){
-			var coin = new Coin({"x":x,"y":y, coinImg:this.images.coin});
-			console.log(coin);
+		drawCoin:function(speed,lane){
+			var x = (this.canvas.width / 3)*(lane) + (this.canvas.width / (6));
+			
+			var coin = new Coin({"x":x,"y":0, coinImg:this.images.coin,speedIncrement:speed, lane:lane});
+			//console.log(coin);
 			this.stage.addChild(coin);
+			this.objectList[this.objectList.length] = coin;
 		},
 		
 		drawScoreField: function(){
@@ -385,6 +432,14 @@ dojo.declare("SonicZoom", null,{
 			this.objectCounter.x = 5;
 			this.objectCounter.y = this.canvas.height - 5;
 			this.stage.addChild(this.objectCounter);
+		},
+		
+		drawTimeCounter:function(){
+			this.timeCounter = new Text("time: 0", "bold 12px Arial", "#FFFFFF");
+			this.timeCounter.textAlign = "left";
+			this.timeCounter.x = 5;
+			this.timeCounter.y = 30;
+			this.stage.addChild(this.timeCounter);
 		},
 		
 		menuNavigation : function(e){
@@ -457,6 +512,7 @@ dojo.declare("SonicZoom", null,{
 					if (!this.lfHeld) {
 						this.lfHeld = true;
 						this.ship.moveLeft();
+						this.changeCoinSound();
 					}
 					break;
 				case KEYCODE_D:
@@ -465,6 +521,7 @@ dojo.declare("SonicZoom", null,{
 						//console.log("right");
 						this.rtHeld = true;
 						this.ship.moveRight();
+						this.changeCoinSound();
 					}
 					break;
 				case KEYCODE_W:
@@ -482,7 +539,7 @@ dojo.declare("SonicZoom", null,{
 		},
 		
 		 handleKeyUp:function(e) {
-			console.log("u:",e.keyCode);
+			//console.log("u:",e.keyCode);
 
 			if(!e){ var e = window.event; }
 			switch(e.keyCode) {
@@ -525,7 +582,6 @@ dojo.declare("SonicZoom", null,{
 				//play training
 				this.audio.play({
 					url: this.soundDir+'traininginstructions',
-					cache: true,
 					channel: 'menuinstruction'
 				});
 				
@@ -539,6 +595,7 @@ dojo.declare("SonicZoom", null,{
 				this.audio.stop({channel:'lane'});
 				this.beginGame();
 				
+				
 			}
 			
 		},
@@ -551,7 +608,6 @@ dojo.declare("SonicZoom", null,{
 				this.menuTimer.stop();
 				this.audio.play({
 					url: this.soundDir + 'training',
-					cache: true,
 					channel: 'menuinstruction'
 				});
 			}
@@ -559,7 +615,6 @@ dojo.declare("SonicZoom", null,{
 				this.menuTimer.stop();
 				this.audio.play({
 					url: this.soundDir + 'startgame',
-					cache: true,
 					channel: 'menuinstruction'
 				});
 			}
@@ -609,9 +664,48 @@ dojo.declare("SonicZoom", null,{
 		
 		startMenuMusic: function(event){
 			
-			this.audio.play({url: this.soundDir+'music', cache: true, channel:'menuBackground'});
+			this.audio.play({url: this.soundDir+'music',  channel:'menuBackground'});
 			this.audio.setProperty({name:'loop', value:true, immediate:true, channel:'menuBackground'});
-			this.audio.setProperty({name:'volume', value:0.5, immediate:true, channel:'menuBackground'});
+			this.audio.setProperty({name:'volume', value:0.15, immediate:true, channel:'menuBackground'});
+			
+		},
+		
+		playCoinSound:function(){
+			
+						
+			if (this.objectList[0]) {
+				var coinSound = this.soundDir + 'coin' + (this.objectList[0].lane+1) + '-' + (this.ship.currentLane+1)
+				
+				this.audio.play({
+					url: coinSound,
+					channel: 'coin'
+				});
+				this.audio.setProperty({
+					name: 'loop',
+					value: true,
+					immediate: true,
+					channel: 'coin'
+				});
+				this.audio.setProperty({
+					name: 'volume',
+					value: 1,
+					immediate: true,
+					channel: 'coin'
+				});
+			}
+			
+		},
+		
+		stopCoinSound:function(){
+			
+			this.audio.stop({channel:'coin'});
+			
+		},
+		
+		changeCoinSound:function(){
+			
+			this.stopCoinSound();
+			this.playCoinSound();
 			
 		},
 		
@@ -626,7 +720,7 @@ dojo.declare("SonicZoom", null,{
 			
 			
 			this.menuTimer.onTick = dojo.hitch(this, function(){
-				this.audio.play({url:this.soundDir+soundByte, cache:true, channel:'menuinstruction'})
+				this.audio.play({url:this.soundDir+soundByte,  channel:'menuinstruction'})
 				});
 				
 			this.menuTimer.start();
@@ -637,6 +731,8 @@ dojo.declare("SonicZoom", null,{
 			
 			var cheight = this.canvas.height;
 			
+			var garbageLine = this.canvas.height+10;
+			
 			this.stage.sortChildren(function(c){
 				return (cheight - c.y)
 			});
@@ -645,10 +741,21 @@ dojo.declare("SonicZoom", null,{
 				(childCount < this.stage.children.length);
 				childCount++){
 					var childObject = this.stage.children[childCount];
-					if(childObject.y > this.canvas.height){
+					if(childObject.y > garbageLine){
 						this.stage.removeChild(childObject);
 					}
 				}
+				
+			for (var i=0; i< this.objectList.length;i++){
+				if (this.objectList[i].y > garbageLine) {
+					this.objectList = this.objectList.splice(i, i);
+					
+					this.stopCoinSound();
+					var newLane = Math.floor(Math.random()*3);
+					this.drawCoin(5,newLane);
+					this.changeCoinSound();
+				}
+			}
 		}
     
     

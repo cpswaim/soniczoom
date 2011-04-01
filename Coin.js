@@ -5,6 +5,10 @@ dojo.declare("Coin", null,{
 	coinImg:undefined,
 	
 	imgPath:"img/coin.png",
+	
+	lane:1,
+	
+	speedIncrement:1,
 			
 	constructor: function(args){
 		
@@ -18,20 +22,19 @@ dojo.declare("Coin", null,{
 			//Now make this class a sprite
 			dojo.safeMixin(this, new BitmapSequence(coinSprite));
 			
-			this.regX = this.spriteSheet.frameWidth/2|0;
-			this.regY = this.spriteSheet.frameHeight/2|0;
+			this.regX = this.spriteSheet.frameWidth/2;
+			this.regY = this.spriteSheet.frameHeight/2;
 			
 			
-			console.log("Coin Created!");
+			//console.log("Coin Created!");
 		}
 		else{
 			console.log("Coin Fail.");
 		}
+		
 		//Take arguments and mix them in.
 		dojo.safeMixin(this, args);
-				
 		
-	}
-	
-	
+	},
+
 });

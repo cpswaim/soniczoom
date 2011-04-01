@@ -8,6 +8,8 @@ dojo.declare("Ship", [Container],{
 	currentLane:1,
 	numberOfLanes:3,
 	
+	hitRadius:0,
+	
 	constructor:function(args) {
 		
 		//Container Object to hold Ship and it's flame.
@@ -34,8 +36,8 @@ dojo.declare("Ship", [Container],{
 		this.scaleX = (this.canvasWidth*0.1)/40;
 		this.scaleY = (this.canvasHeight*0.1)/30;
 		
-		var bigScalar = Math.max(this.scaleX,this.scaleY)
-		this.bounds = 20*bigScalar;
+		this.bigScalar = Math.max(this.scaleX,this.scaleY)
+		this.bounds = 20*this.bigScalar;
 	},
 	
 	makeShape:function() {
