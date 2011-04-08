@@ -7,6 +7,8 @@ dojo.declare("Ship", [Container],{
 	canvasWidth : 640,
 	currentLane:1,
 	numberOfLanes:3,
+	speed:0,
+	engineVolume: .1,
 	
 	hitRadius:0,
 	
@@ -114,7 +116,24 @@ dojo.declare("Ship", [Container],{
 	reset:function(){
 		this.x = (this.canvasWidth / this.numberOfLanes) * (Math.floor(this.numberOfLanes/2)) + (this.canvasWidth / (this.numberOfLanes * 2));
 		this.y = (this.canvasHeight - this.bounds - 10);
+		this.speed = 0;
+	},
+	
+	accelerate : function() {
+		if (this.speed < 10) {
+			this.speed += 1;
+			this.engineVolume = .05+.2*(this.speed/10);
+		}
+		
+	},
+	
+	deccelerate : function() {
+		if (this.speed > 0) {
+			this.speed -= 1;
+			this.engineVolume = .05 + .2 * (this.speed / 10);
+		}
 	}
+	
 
 
 });
