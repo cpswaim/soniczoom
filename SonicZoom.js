@@ -296,16 +296,21 @@ dojo.declare("SonicZoom", null,{
 		
 		checkCollisions: function(){
 			
-			for (var i in this.objectList){
-				if((this.ship.currentLane == this.objectList[i].lane) && (this.objectList[i].y > this.canvas.height-(2*this.ship.bounds))){
-					this.stage.removeChild(this.objectList[i]);
-					this.score += 100;
-					this.objectList = [];
-					
-					this.audio.play({url:this.soundDir+'hitcoin', channel:'action'});
-					
-					var maxCoins = 10+this.currentLevel;
-					this.drawRandomCoin();
+			if (this.objectList.length > 0) {
+				for (var i in this.objectList) {
+					if ((this.ship.currentLane == this.objectList[i].lane) && (this.objectList[i].y > this.canvas.height - (2 * this.ship.bounds))) {
+						this.stage.removeChild(this.objectList[i]);
+						this.score += 100;
+						this.objectList = [];
+						
+						this.audio.play({
+							url: this.soundDir + 'hitcoin',
+							channel: 'action'
+						});
+						
+						var maxCoins = 10 + this.currentLevel;
+						this.drawRandomCoin();
+					}
 				}
 			}
 			
