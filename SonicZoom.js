@@ -61,7 +61,7 @@ dojo.declare("SonicZoom", null,{
 		level:1,
 		objectList:[],
 		objectSpeed:1,
-		coinsDrawn: 0,
+		coinsToDraw: 0,
 		currentLevel: 1,
 		
 		//Image stuff
@@ -230,7 +230,7 @@ dojo.declare("SonicZoom", null,{
 			this.audio.say({text: "Level" + this.currentLevel, channel: 'menuinstruction'});
 			this.audio.play({url:this.soundDir+'readysetgo', channel:'menuinstruction'}).anyAfter(dojo.hitch(this,'beginGame'));
 			
-			this.coinsDrawn = 0;
+			this.coinsToDraw = 10+level;
 
 		},
 		
@@ -303,6 +303,8 @@ dojo.declare("SonicZoom", null,{
 					this.objectList = [];
 					
 					this.audio.play({url:this.soundDir+'hitcoin', channel:'action'});
+					
+					var maxCoins = 10+this.currentLevel;
 					this.drawRandomCoin();
 				}
 			}
@@ -312,21 +314,24 @@ dojo.declare("SonicZoom", null,{
 		checkForComplete : function(){
 			
 			var maxCoins = 10+this.currentLevel;
-			if(this.coinsDrawn > maxCoins) this.levelComplete();
+			if(this.coinsToDraw == 0) this.levelComplete();
 			
 		},
 		
 		coinVolume : function(){
-			var coinVol = 0.1+0.9*(this.objectList[0].y/this.canvas.height);
-			
-			if(coinVol > 1) coinVol = 1;
-			
-			this.audio.setProperty({
+			if (this.objectList[0]) {
+				var coinVol = 0.1 + 0.9 * (this.objectList[0].y / this.canvas.height);
+				
+				if (coinVol > 1) 
+					coinVol = 1;
+				
+				this.audio.setProperty({
 					name: 'volume',
 					value: coinVol,
 					immediate: true,
 					channel: 'coin'
 				});
+			}
 		},
 		
 		objectTick : function() {
@@ -475,13 +480,21 @@ dojo.declare("SonicZoom", null,{
 		},
 		
 		drawCoin:function(speed,lane){
-			var x = (this.canvas.width / 3)*(lane) + (this.canvas.width / (6));
-			
-			var coin = new Coin({"x":x,"y":0, coinImg:this.images.coin,speedIncrement:speed, lane:lane});
-			//console.log(coin);
-			this.stage.addChild(coin);
-			this.objectList[this.objectList.length] = coin;
-			this.coinsDrawn += 1;
+			if (this.coinsToDraw > 0) {
+				var x = (this.canvas.width / 3) * (lane) + (this.canvas.width / (6));
+				
+				var coin = new Coin({
+					"x": x,
+					"y": 0,
+					coinImg: this.images.coin,
+					speedIncrement: speed,
+					lane: lane
+				});
+				//console.log(coin);
+				this.stage.addChild(coin);
+				this.objectList[this.objectList.length] = coin;
+				this.coinsToDraw -= 1;
+			}
 		},
 		
 		drawScoreField: function(){
@@ -772,7 +785,7 @@ dojo.declare("SonicZoom", null,{
 			
 						
 			if (this.objectList[0]) {
-				var coinSound = this.soundDir + 'coin' + (this.objectList[0].lane+1) + '-' + (this.ship.currentLane+1)
+				var coinSound = this.soundDir + 'coin' + (this.numberOfLanes-this.objectList[0].lane) + '-' + (this.numberOfLanes-this.ship.currentLane)
 				
 				this.audio.play({
 					url: coinSound,
@@ -861,7 +874,7 @@ dojo.declare("SonicZoom", null,{
 			for (var i=0; i< this.objectList.length;i++){
 				if (this.objectList[i].y > garbageLine) {
 					this.objectList = this.objectList.splice(i, i);
-					
+					var maxCoins = 10+this.currentLevel;
 					this.drawRandomCoin();
 				}
 			}
