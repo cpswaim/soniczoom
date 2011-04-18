@@ -146,7 +146,11 @@ dojo.declare("SonicZoom", null,{
 			this.audio.stop({channel:'menuinstruction'});
 			this.audio.stop({channel:'menuBackground'});
 			this.audio.stop({channel:'lane'});
-			this.audio.stop({channel:'coin'});
+			this.audio.stop({channel:'coin0'});
+			this.audio.stop({channel:'coin1'});
+			this.audio.stop({channel:'coin2'});
+			this.audio.stop({channel:'coin3'});
+			this.audio.stop({channel:'coin4'});
 			this.audio.stop({channel:'engine'});
 			
 			dojo.disconnect(this.clicker);
@@ -280,7 +284,7 @@ dojo.declare("SonicZoom", null,{
 			
 			this.objectTick();
 			
-			this.coinVolume();
+			this.objectVolume();
 			this.checkCollisions();
 			
 			//Draw stars on the edge of the screen
@@ -322,23 +326,26 @@ dojo.declare("SonicZoom", null,{
 		checkForComplete : function(){
 			
 			var maxCoins = 10+this.currentLevel;
-			if(this.coinsToDraw == 0) this.levelComplete();
+			if(this.coinsToDraw == 0 && this.objectList.length == 0) this.levelComplete();
 			
 		},
 		
-		coinVolume : function(){
-			if (this.objectList[0]) {
-				var coinVol = 0.1 + 0.9 * (this.objectList[0].y / this.canvas.height);
+		objectVolume : function(){
+			if (this.objectList[0] && this.objectList.length > 0) {
 				
-				if (coinVol > 1) 
-					coinVol = 1;
+				for(var i in this.objectList){
+					var coinVol = 0.1 + 0.9 * (this.objectList[i].y / this.canvas.height);
 				
-				this.audio.setProperty({
-					name: 'volume',
-					value: coinVol,
-					immediate: true,
-					channel: 'coin'
-				});
+					if (coinVol > 1) 
+						coinVol = 1;
+				
+					this.audio.setProperty({
+						name: 'volume',
+						value: coinVol,
+						immediate: true,
+						channel: 'coin'+i
+					});
+				}
 			}
 		},
 		
@@ -646,7 +653,7 @@ dojo.declare("SonicZoom", null,{
 		},
 		
 		 handleKeyUp:function(e) {
-			console.log("u:",e.keyCode);
+			//console.log("u:",e.keyCode);
 
 			if(!e){ var e = window.event; }
 			switch(e.keyCode) {
@@ -792,32 +799,39 @@ dojo.declare("SonicZoom", null,{
 		playCoinSound:function(){
 			
 						
-			if (this.objectList[0]) {
-				var coinSound = this.soundDir + 'coin' + (this.numberOfLanes-this.objectList[0].lane) + '-' + (this.numberOfLanes-this.ship.currentLane)
-				
-				this.audio.play({
-					url: coinSound,
-					channel: 'coin'
-				});
-				this.audio.setProperty({
-					name: 'loop',
-					value: true,
-					immediate: true,
-					channel: 'coin'
-				});
-				this.audio.setProperty({
-					name: 'volume',
-					value: 0.1,
-					immediate: true,
-					channel: 'coin'
-				});
+			if (this.objectList[0] && this.objectList.length > 0) {
+				for (var i in this.objectList){
+					var coinSound = this.soundDir + 'coin' + (this.numberOfLanes-this.objectList[i].lane) + '-' + (this.numberOfLanes-this.ship.currentLane)
+										
+					console.log('coin'+i);
+					this.audio.play({
+						url: coinSound,
+						channel: 'coin'+i
+					});
+					this.audio.setProperty({
+						name: 'loop',
+						value: true,
+						immediate: true,
+						channel: 'coin'+i
+					});
+					this.audio.setProperty({
+						name: 'volume',
+						value: 0.1,
+						immediate: true,
+						channel: 'coin'+i
+					});
+				}
 			}
 			
 		},
 		
 		stopCoinSound:function(){
 			
-			this.audio.stop({channel:'coin'});
+			this.audio.stop({channel:'coin0'});
+			this.audio.stop({channel:'coin1'});
+			this.audio.stop({channel:'coin2'});
+			this.audio.stop({channel:'coin3'});
+			this.audio.stop({channel:'coin4'});
 			
 		},
 		
@@ -832,7 +846,11 @@ dojo.declare("SonicZoom", null,{
 			
 			var channels = [
 			'engine',
-			'coin',
+			'coin0',
+			'coin1',
+			'coin2',
+			'coin3',
+			'coin4',			
 			'lane'			
 			];
 			
