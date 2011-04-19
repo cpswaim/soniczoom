@@ -28,9 +28,6 @@ dojo.declare("Coin", null,{
 			
 			//console.log("Coin Created!");
 		}
-		else{
-			console.log("Coin Fail.");
-		}
 		
 		//Take arguments and mix them in.
 		dojo.safeMixin(this, args);
