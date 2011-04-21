@@ -1,0 +1,22 @@
+{
+      "identifier" : "url",
+      "items" : [
+          {
+              "url" : "soniczoom",
+              "label" : {
+                  "en-us" : "Sonic Zoom"
+              },
+              "tags" : {
+                  "en-us" : "spatial, space"
+              },
+              "description" : {
+                  "en-us" : "Sonic Zoom"
+              },
+              "media" : {
+                  "icon" : "tictactoe/info/icon.png",
+                  "screenshots" : ['tictactoe/info/screenshot3x3.png']
+              },
+              "attribution" : "tictactoe/info/attribution.json"
+          }
+      ]
+  }
