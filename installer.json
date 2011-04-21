@@ -13,8 +13,8 @@
                   "en-us" : "Your mission: collect coins, avoid obstacles, and get to the finish line intact."
               },
               "media" : {
-                  "icon" : "soncizoom/favicon.ico",
-                  "screenshots" : []
+                  "icon" : "soncizoom/hark/icon.png",
+                  "screenshots" : ['soncizoom/hark/icon.png']
               },
               "attribution" : "soniczoom/hark/attribution.json"
           }
