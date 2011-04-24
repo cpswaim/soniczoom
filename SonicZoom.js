@@ -18,6 +18,7 @@ dojo.require("dojox.timing._base");
 dojo.require("Ship");
 dojo.require("Star");
 dojo.require("Coin");
+dojo.require("Obstacle");
 
 
 dojo.declare("SonicZoom", null,{
@@ -62,9 +63,11 @@ dojo.declare("SonicZoom", null,{
 		objectList:[],
 		objectSpeed:1,
 		coinsToDraw: 0,
+		obstaclesToDraw: 0,
 		maxLanes: 2,
 		currentLevel: 1,
-		
+		lives: 3,
+				
 		//Image stuff
 		images:{},
 		coinPath:"img/coin.png",
@@ -234,8 +237,11 @@ dojo.declare("SonicZoom", null,{
 			this.audio.play({url:this.soundDir+'readysetgo', channel:'menuinstruction'}).anyAfter(dojo.hitch(this,'beginGame'));
 			
 			this.coinsToDraw = 10+level;
+			
+			this.obstaclesToDraw = 0;
+			if(level > 7) this.obstaclesToDraw = (level - 5);
 
-			if (level > 8) this.maxLanes = 3; 
+			if (level > 4) this.maxLanes = 3; 
 
 		},
 		
@@ -271,7 +277,7 @@ dojo.declare("SonicZoom", null,{
 			if (Math.floor(secondsElapsed) == secondsElapsed) {
 				this.gameTime = (secondsElapsed-this.levelStartTime)
 				
-				this.score = this.score + 5;
+				this.score = this.score + 5 + this.worldSpeed;
 				this.scoreField.text = "score: " + (this.score);
 				this.timeCounter.text = "time: "+(this.gameTime);
 			}
@@ -307,18 +313,35 @@ dojo.declare("SonicZoom", null,{
 					if ((this.objectList[i]) && 
 						(this.ship.currentLane == this.objectList[i].lane) && 
 						(this.objectList[i].y > this.canvas.height - (2 * this.ship.bounds))) {
-							
-						this.stage.removeChild(this.objectList[i]);
-						this.score += 100;
-						this.objectList.splice(i,1);
 						
-						this.audio.play({
-							url: this.soundDir + 'hitcoin',
-							channel: 'action'
-						});
+						if(this.objectList[i].declaredClass == "Coin"){	
+							this.stage.removeChild(this.objectList[i]);
+							this.score += 100;
+							this.objectList.splice(i,1);
+						
+							this.audio.play({
+								url: this.soundDir + 'hitcoin',
+								channel: 'action'
+							});
 
-						this.changeCoinSound();
-						this.drawExtraCoins();
+							this.changeCoinSound();
+							this.drawExtraCoins();
+						}
+						else if (this.objectList[i].declaredClass == "Obstacle"){
+						
+							this.stage.removeChild(this.objectList[i]);
+							this.lives -= 1;
+							this.objectList.splice(i,1);
+						
+							this.audio.play({
+								url: this.soundDir + 'hitobstacle',
+								channel: 'action'
+							});
+
+							this.changeCoinSound();
+							this.drawExtraCoins();
+						
+						}
 					}
 				}
 			}
@@ -328,6 +351,7 @@ dojo.declare("SonicZoom", null,{
 		checkForComplete : function(){
 			
 			if(this.coinsToDraw == 0 && this.objectList.length == 0) this.levelComplete();
+			else if(this.lives == 0) this.playerDied();
 			
 		},
 		
@@ -352,9 +376,9 @@ dojo.declare("SonicZoom", null,{
 		
 		objectTick : function() {
 						
-			var worldSpeed = (this.objectSpeed + this.ship.speed);
+			this.worldSpeed = (this.objectSpeed + this.ship.speed);
 			for (var i in this.objectList){
-				this.objectList[i].y += worldSpeed;
+				this.objectList[i].y += this.worldSpeed;
 			}
 			
 		},

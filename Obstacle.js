@@ -7,6 +7,7 @@ dojo.declare("Obstacle", [Container],{
 	lane:1,
 	
 	hitRadius:0,
+	speedIncrement:1,
 	
 	constructor:function(args) {
 		
@@ -36,7 +37,7 @@ dojo.declare("Obstacle", [Container],{
 	
 	makeShape:function() {
 		
-		//draw ship body
+		//draw body
 		var g = this.outerBox.graphics;
 		g.clear();
 		g.setStrokeStyle(1,"round").beginStroke("#FFFFFF");
@@ -49,7 +50,7 @@ dojo.declare("Obstacle", [Container],{
 		g.closePath();
 		
 		
-		//draw ship flame
+		//draw inner box
 		var o = this.innerBox;
 		
 		g = o.graphics;
@@ -63,7 +64,6 @@ dojo.declare("Obstacle", [Container],{
 		g.lineTo(-17, 17);	//lfin
 		g.closePath();
 		
-		this.rotation = 180;
 	},
 	
 	tick : function() {
@@ -71,8 +71,5 @@ dojo.declare("Obstacle", [Container],{
 		this.rotation = (this.rotation + 2)%360;
 
 	}
-	}
-	
-
 
 });
