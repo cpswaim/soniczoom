@@ -13,8 +13,8 @@
                   "en-us" : "Sonic Zoom"
               },
               "media" : {
-                  "icon" : "tictactoe/info/icon.png",
-                  "screenshots" : ['tictactoe/info/screenshot3x3.png']
+                  "icon" : "soniczoom/hark/icon.png",
+                  "screenshots" : []
               },
               "attribution" : "tictactoe/info/attribution.json"
           }
