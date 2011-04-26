@@ -231,17 +231,21 @@ dojo.declare("SonicZoom", null,{
 			
 			dojo.disconnect(this.clicker);
 			dojo.disconnect(this.keyDownEvent);
-			this.objectSpeed = Math.floor(1+(level-1)*0.5);			
+			this.objectSpeed = Math.floor(1+(level-1)*0.5);
+			if (this.objectSpeed > 6) this.objectSpeed = 6;		
 			this.tick = function(){};
 			this.audio.say({text: "Level" + this.currentLevel, channel: 'menuinstruction'});
 			this.audio.play({url:this.soundDir+'readysetgo', channel:'menuinstruction'}).anyAfter(dojo.hitch(this,'beginGame'));
 			
 			this.coinsToDraw = 10+level;
-			
+						
 			this.obstaclesToDraw = 0;
-			if(level > 7) this.obstaclesToDraw = (level - 5);
+			if(level > 2) this.obstaclesToDraw = level;
 
-			if (level > 4) this.maxLanes = 3; 
+			if (level > 4) {
+				this.maxLanes = 3; 
+				this.coinsToDraw += 5 + level;
+			}
 
 		},
 		
@@ -262,6 +266,22 @@ dojo.declare("SonicZoom", null,{
 						});
 					}));
 				}));
+			}));
+			
+		},
+		
+		playerDied : function(){
+			
+			dojo.disconnect(this.clicker);
+			dojo.disconnect(this.keyDownEvent);
+			
+			this.tick = function(){};
+			this.stopGameAudio();
+			this.audio.play({url:this.soundDir+'death', channel:'action'}).anyAfter(dojo.hitch(this,function(){
+				this.audio.say({text: "Your score is " + this.score +".  Press the escape key to return to the main menu."}).anyAfter(
+					dojo.hitch(this,function(){
+						this.keyDownEvent = dojo.connect(null, 'onkeydown', this, this.returnToMenu);
+					}));
 			}));
 			
 		},
@@ -331,6 +351,7 @@ dojo.declare("SonicZoom", null,{
 						
 							this.stage.removeChild(this.objectList[i]);
 							this.lives -= 1;
+							this.ship.speed = 0;
 							this.objectList.splice(i,1);
 						
 							this.audio.play({
@@ -350,7 +371,14 @@ dojo.declare("SonicZoom", null,{
 		
 		checkForComplete : function(){
 			
-			if(this.coinsToDraw == 0 && this.objectList.length == 0) this.levelComplete();
+			if(this.coinsToDraw == 0 && this.obstaclesToDraw == 0 && this.objectList.length == 0){
+			
+			this.score = this.score + 200;
+			this.scoreField.text = "score: " + (this.score);
+			this.stage.tick();
+			this.levelComplete();
+			
+			}
 			else if(this.lives == 0) this.playerDied();
 			
 		},
@@ -401,7 +429,7 @@ dojo.declare("SonicZoom", null,{
 				if(!this.images[x].complete){ return; }
 			}
 			
-			console.log("images loaded!", this.images);
+			//console.log("images loaded!", this.images);
 			this.clicker = dojo.connect(this.canvas, 'onclick', this, this.menuInit);
 			this.keyDownEvent = dojo.connect(null, 'onkeydown', this, this.menuInit); 
 			this.loadingText.text = "Press Any Key to Play!";
@@ -534,7 +562,25 @@ dojo.declare("SonicZoom", null,{
 				this.stopCoinSound();
 				var newLane = Math.floor(Math.random()*3);
 				while (dojo.indexOf(usedLanes,newLane) != -1) newLane = Math.floor(Math.random()*3);
-				this.drawCoin(5,newLane);
+				
+				var shouldDrawCoin = true;
+				
+				if(this.obstaclesToDraw <= 0){
+				
+					this.drawCoin(5,newLane);
+					
+				}
+				else if(this.coinsToDraw <= 0) {
+					this.drawObstacle(5,newLane);
+				}
+				else {
+				
+					var obstaclePercent = this.obstaclesToDraw/this.coinsToDraw;
+					if(obstaclePercent+Math.random() > 1) this.drawObstacle(5,newLane);
+					else this.drawCoin(5,newLane);
+					
+				}
+					
 				this.changeCoinSound();
 
 			}
@@ -555,6 +601,23 @@ dojo.declare("SonicZoom", null,{
 				this.stage.addChild(coin);
 				this.objectList.push(coin);
 				this.coinsToDraw -= 1;
+			}
+		},
+		
+		drawObstacle:function(speed,lane){
+			if (this.obstaclesToDraw > 0) {
+				var x = (this.canvas.width / 3) * (lane) + (this.canvas.width / (6));
+				
+				var obstacle = new Obstacle({
+					"x": x,
+					"y": 0,
+					speedIncrement: speed,
+					lane: lane
+				});
+				//console.log(coin);
+				this.stage.addChild(obstacle);
+				this.objectList.push(obstacle);
+				this.obstaclesToDraw -= 1;
 			}
 		},
 		
@@ -676,7 +739,7 @@ dojo.declare("SonicZoom", null,{
 					break;
 				case KEYCODE_W:
 				case KEYCODE_UP:
-					if (!this.fwdHeld) {
+					if (true) {
 						this.fwdHeld = true;
 						this.ship.accelerate();
 						this.setEngineNoise();
@@ -684,7 +747,7 @@ dojo.declare("SonicZoom", null,{
 					break;
 				case KEYCODE_S:
 				case KEYCODE_DOWN:
-					if (!this.dnHeld) {
+					if (true) {
 						this.dnHeld = true;
 						this.ship.deccelerate();
 						this.setEngineNoise();
@@ -734,7 +797,7 @@ dojo.declare("SonicZoom", null,{
 			
 			this.menuTimer.stop();
 			
-			console.log(this.audio);
+			//console.log(this.audio);
 			
 			if(this.menuPos == 0){
 				//Training!
@@ -847,9 +910,13 @@ dojo.declare("SonicZoom", null,{
 						
 			if (this.objectList.length > 0) {
 				for (var i in this.objectList){
-					var coinSound = this.soundDir + 'coin' + (this.numberOfLanes-this.objectList[i].lane) + '-' + (this.numberOfLanes-this.ship.currentLane)
+				
+					var objectType = "coin";
+					if (this.objectList[i].declaredClass == "Obstacle") var objectType = "obstacle";
+					
+					var coinSound = this.soundDir + objectType + (this.numberOfLanes-this.objectList[i].lane) + '-' + (this.numberOfLanes-this.ship.currentLane)
 										
-					//console.log('coin'+i);
+					//console.log(objectType + (this.numberOfLanes-this.objectList[i].lane) + '-' + (this.numberOfLanes-this.ship.currentLane));
 					this.audio.play({
 						url: coinSound,
 						channel: 'coin'+i

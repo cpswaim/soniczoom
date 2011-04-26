@@ -120,7 +120,7 @@ dojo.declare("Ship", [Container],{
 	},
 	
 	accelerate : function() {
-		if (this.speed < 10) {
+		if (this.speed < 6) {
 			this.speed += 1;
 			this.engineVolume = .05+.2*(this.speed/10);
 		}
