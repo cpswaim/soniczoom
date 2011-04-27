@@ -14,7 +14,6 @@ dojo.provide("SonicZoom");
 
 dojo.require("dojox.timing._base");
 
-//dojo.require("BoundedObject");
 dojo.require("Ship");
 dojo.require("Star");
 dojo.require("Coin");
@@ -238,10 +237,11 @@ dojo.declare("SonicZoom", null,{
 			this.audio.play({url:this.soundDir+'readysetgo', channel:'menuinstruction'}).anyAfter(dojo.hitch(this,'beginGame'));
 			
 			this.coinsToDraw = 10+level;
-						
 			this.obstaclesToDraw = 0;
-			if(level > 2) this.obstaclesToDraw = level;
+			if(level > 1) this.obstaclesToDraw = level;
 
+			this.lives = 3;
+			
 			if (level > 4) {
 				this.maxLanes = 3; 
 				this.coinsToDraw += 5 + level;
