@@ -245,7 +245,7 @@ dojo.declare("SonicZoom", null,{
 			this.audio.say({text: "Level" + this.currentLevel, channel: 'menuinstruction'});
 			this.audio.play({url:this.soundDir+'readysetgo', channel:'menuinstruction'}).anyAfter(dojo.hitch(this,'beginGame'));
 			
-			this.coinsToDraw = 10+(level*2);
+			this.coinsToDraw = 10+(level);
 			this.obstaclesToDraw = 0;
 			if(level > 1 && !this.noObjects) this.obstaclesToDraw = level;
 
@@ -253,7 +253,7 @@ dojo.declare("SonicZoom", null,{
 			
 			if (level > 3) {
 				this.maxLanes = 3; 
-				this.coinsToDraw += 5 + level;
+				this.coinsToDraw += 5;
 			}
 
 		},
