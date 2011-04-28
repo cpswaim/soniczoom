@@ -247,7 +247,7 @@ dojo.declare("SonicZoom", null,{
 			
 			this.coinsToDraw = 10+(level*2);
 			this.obstaclesToDraw = 0;
-			if(level > 5 && !this.noObjects) this.obstaclesToDraw = level - 4;
+			if(level > 2 && !this.noObjects) this.obstaclesToDraw = level;
 
 			this.lives = 3;
 			
@@ -263,6 +263,8 @@ dojo.declare("SonicZoom", null,{
 			dojo.disconnect(this.clicker);
 			dojo.disconnect(this.keyDownEvent);
 			
+			
+			//Queue on same channel
 			this.tick = function(){};
 			this.stopGameAudio();
 			this.audio.play({url:this.soundDir+'levelend', channel:'action'}).anyAfter(dojo.hitch(this,function(){
