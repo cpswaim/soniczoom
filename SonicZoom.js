@@ -247,7 +247,7 @@ dojo.declare("SonicZoom", null,{
 			
 			this.coinsToDraw = 10+(level*2);
 			this.obstaclesToDraw = 0;
-			if(level > 2 && !this.noObjects) this.obstaclesToDraw = level;
+			if(level > 2 && !this.noObjects) this.obstaclesToDraw = level-1;
 
 			this.lives = 3;
 			
