@@ -30,6 +30,7 @@ dojo.declare("SonicZoom", null,{
         height:document.documentElement.clientHeight-60,
         width:document.documentElement.clientWidth-25,
 		numberOfLanes:3,
+		noObjects : false,
 		fps:30,
 		
 		//Text
@@ -244,13 +245,13 @@ dojo.declare("SonicZoom", null,{
 			this.audio.say({text: "Level" + this.currentLevel, channel: 'menuinstruction'});
 			this.audio.play({url:this.soundDir+'readysetgo', channel:'menuinstruction'}).anyAfter(dojo.hitch(this,'beginGame'));
 			
-			this.coinsToDraw = 10+level;
+			this.coinsToDraw = 10+(level*2);
 			this.obstaclesToDraw = 0;
-			if(level > 1) this.obstaclesToDraw = level;
+			if(level > 5 && !this.noObjects) this.obstaclesToDraw = level - 4;
 
 			this.lives = 3;
 			
-			if (level > 4) {
+			if (level > 3) {
 				this.maxLanes = 3; 
 				this.coinsToDraw += 5 + level;
 			}
@@ -505,13 +506,32 @@ dojo.declare("SonicZoom", null,{
 			
 			this.drawTimeCounter();
 			this.drawScoreField();
+			this.drawLanes();
+		},
+		
+		drawLanes : function(){
+		
+			var oneThird = Math.floor(this.canvas.width/3);
+			var g = new Graphics();
+			g.setStrokeStyle(1);
+			g.beginStroke(Graphics.getRGB(255,255,255,.7));
+			g.beginFill(Graphics.getRGB(255,255,255,.7));
+			g.rect(oneThird, 20, 10, this.canvas.height-40);
+			
+			var lane1 = new Shape(g);
+			var lane2 = new Shape(g);
+			lane2.x += oneThird;
+			
+			this.stage.addChild(lane1);
+			this.stage.addChild(lane2);
+		
 		},
 		
 		drawShip : function(){
 
 			this.ship = new Ship({canvasHeight:this.canvas.height, canvasWidth:this.canvas.width, TOGGLE:Math.floor(this.fps/12), numberOfLanes:this.numberOfLanes});
 			this.ship.reset();
-			
+						
 			this.stage.addChild(this.ship);
 			
 		},
