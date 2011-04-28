@@ -136,8 +136,7 @@ dojo.declare("SonicZoom", null,{
 				
 				this.loadImages();
 				
-				dojo.subscribe('/org/hark/prefsthis.audio.setProperty({name:'volume', value:(0.15*this.harkMusicVolume*this.harkVolume), immediate:true, channel:'menuBackground'});
-					/response', dojo.hitch(this,'prefsCallback'));				                    
+				dojo.subscribe('/org/hark/prefs/response', dojo.hitch(this,'prefsCallback'));				                    
                 
             }
             else{
