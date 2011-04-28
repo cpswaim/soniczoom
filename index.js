@@ -12,7 +12,7 @@ function init(){
 	
 	audio.defaultCaching = true;
 	
-    game = new SonicZoom({canvas_id:"worldCanvas", height:gameheight, width:gamewidth, audio:audio, debug:true});
+    szgame = new SonicZoom({canvas_id:"worldCanvas", height:gameheight, width:gamewidth, audio:audio, debug:true});
 	
 	
 }
