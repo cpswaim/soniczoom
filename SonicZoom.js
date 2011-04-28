@@ -297,6 +297,9 @@ dojo.declare("SonicZoom", null,{
         
         gameTick : function(){  
 		
+		
+			if(!this.score) this.score = 0;
+			
 			var ticks = Ticker.getTicks(false);
 			
 			this.checkForComplete();
@@ -333,6 +336,7 @@ dojo.declare("SonicZoom", null,{
 			this.GC();
 			
             this.stage.update();
+            
         },
 		
 		checkCollisions: function(){
