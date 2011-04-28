@@ -90,6 +90,12 @@ dojo.declare("SonicZoom", null,{
 		keyDownEvent: undefined,
 		keyUpEvent: undefined,
 		
+		//hark volumes
+		harkVolume : 1.0,
+		harkSpeechVolume : 1.0,
+		harkEffectVolume : 1.0,
+		harkMusicVolume : 1.0,
+		
         constructor:function(args){
         
             //Take arguments and mix them in.
@@ -127,7 +133,9 @@ dojo.declare("SonicZoom", null,{
 				
 				this.stage.update();
 				
-				this.loadImages();				                    
+				this.loadImages();
+				
+				dojo.subscribe('/org/hark/prefs/response', this.prefsCallback);				                    
                 
             }
             else{
@@ -387,14 +395,14 @@ dojo.declare("SonicZoom", null,{
 			if (this.objectList.length > 0) {
 				
 				for(var i in this.objectList){
-					var coinVol = 0.1 + 0.9 * (this.objectList[i].y / this.canvas.height);
+					var coinVol = (0.05 + 0.9 * (this.objectList[i].y / this.canvas.height));
 				
 					if (coinVol > 1) 
 						coinVol = 1;
 				
 					this.audio.setProperty({
 						name: 'volume',
-						value: coinVol,
+						value: coinVol * this.harkEffectVolume * this.harkVolume,
 						immediate: true,
 						channel: 'coin'+i
 					});
@@ -893,7 +901,7 @@ dojo.declare("SonicZoom", null,{
 			this.audio.stop({channel:'engine'});
 			this.audio.play({url: this.soundDir+'engine', channel:'engine'});
 			
-			this.audio.setProperty({name:'volume', value:this.ship.engineVolume, immediate:true, channel:'engine'});
+			this.audio.setProperty({name:'volume', value:this.ship.engineVolume*this.harkEffectVolume*this.harkVolume, immediate:true, channel:'engine'});
 			this.audio.setProperty({name:'loop', value:true, immediate:true, channel:'engine'});
 		},
 		
@@ -901,7 +909,7 @@ dojo.declare("SonicZoom", null,{
 			
 			this.audio.play({url: this.soundDir+'music',  channel:'menuBackground'});
 			this.audio.setProperty({name:'loop', value:true, immediate:true, channel:'menuBackground'});
-			this.audio.setProperty({name:'volume', value:0.15, immediate:true, channel:'menuBackground'});
+			this.audio.setProperty({name:'volume', value:0.15*this.harkMusicVolume*this.harkVolume, immediate:true, channel:'menuBackground'});
 			
 		},
 		
@@ -916,7 +924,6 @@ dojo.declare("SonicZoom", null,{
 					
 					var coinSound = this.soundDir + objectType + (this.numberOfLanes-this.objectList[i].lane) + '-' + (this.numberOfLanes-this.ship.currentLane)
 										
-					//console.log(objectType + (this.numberOfLanes-this.objectList[i].lane) + '-' + (this.numberOfLanes-this.ship.currentLane));
 					this.audio.play({
 						url: coinSound,
 						channel: 'coin'+i
@@ -927,12 +934,7 @@ dojo.declare("SonicZoom", null,{
 						immediate: true,
 						channel: 'coin'+i
 					});
-					this.audio.setProperty({
-						name: 'volume',
-						value: 0.1,
-						immediate: true,
-						channel: 'coin'+i
-					});
+					this.objectVolume();
 				}
 			}
 			
@@ -1013,6 +1015,37 @@ dojo.declare("SonicZoom", null,{
 					break;
 				}
 			}
+		},
+		
+		///HARK Stuff
+		prefsCallback : function(prefs, which){
+		
+		switch(which){
+			
+			case 'speechRate':
+				//80-400
+				audio.setProperty({name : 'rate', value : prefs});
+				break;
+			case 'volume':
+				//0.0-1.0
+				this.harkVolume = prefs;
+				break;
+			case 'speechVolume':
+				//0.0-1.0
+				this.harkSpeechVolume = prefs;
+				break;
+			case 'soundVolume':
+				//0.0-1.0
+				this.harkEffectVolume = prefs;
+				break;
+			case 'musicVolume':
+				//0.0-1.0
+				this.harkMusicVolume = prefs;
+				this.audio.setProperty({name:'volume', value:0.15*this.harkMusicVolume*this.harkVolume, immediate:true, channel:'menuBackground'});
+				break;
+		
+		}
+		
 		}
     
     

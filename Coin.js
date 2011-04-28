@@ -25,6 +25,8 @@ dojo.declare("Coin", null,{
 			this.regX = this.spriteSheet.frameWidth/2;
 			this.regY = this.spriteSheet.frameHeight/2;
 			
+			this.scaleX = 2;
+			this.scaleY = 2;
 			
 			//console.log("Coin Created!");
 		}
