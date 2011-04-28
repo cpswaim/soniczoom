@@ -1044,33 +1044,35 @@ dojo.declare("SonicZoom", null,{
 		///HARK Stuff
 		prefsCallback : function(prefs, which){
 		
-		console.log(which, prefs);
+			console.log(which, prefs);
 		
-		switch(which){
+			switch(which){
 			
-			case 'speechRate':
-				//80-400
-				audio.setProperty({name : 'rate', value : prefs[which]});
-				break;
-			case 'volume':
-				//0.0-1.0
-				this.harkVolume = prefs[which];
-				break;
-			case 'speechVolume':
-				//0.0-1.0
-				this.harkSpeechVolume = prefs[which];
-				break;
-			case 'soundVolume':
-				//0.0-1.0
-				this.harkEffectVolume = prefs[which];
-				break;
-			case 'musicVolume':
-				//0.0-1.0
-				this.harkMusicVolume = prefs[which];
-				this.audio.setProperty({name:'volume', value:(0.15*this.harkMusicVolume*this.harkVolume), immediate:true, channel:'menuBackground'});
-				break;
+				case 'speechRate':
+					//80-400
+					this.audio.setProperty({name : 'rate', value : prefs[which]});
+					break;
+				case 'volume':
+					//0.0-1.0
+					this.harkVolume = prefs[which];
+					break;
+				case 'speechVolume':
+					//0.0-1.0
+					this.harkSpeechVolume = prefs[which];
+					break;
+				case 'soundVolume':
+					//0.0-1.0
+					this.harkEffectVolume = prefs[which];
+					break;
+				case 'musicVolume':
+					//0.0-1.0
+					this.harkMusicVolume = prefs[which];
+					this.audio.setProperty({name:'volume', value:(0.15*this.harkMusicVolume*this.harkVolume), immediate:true, channel:'menuBackground'});
+					break;
 		
-		}
+			}
+		
+			console.log(this.harkVolume,this.harkSpeechVolume,this.harkEffectVolume,this.harkMusicVolume);
 		
 		}
     
